@@ -811,17 +811,18 @@ func (c *AnimeDriveClient) GetAnimeDetails(animeURL string) (*AnimeDriveDetails,
 
 	// Extract episodes
 	var episodes []AnimeDriveEpisode
-	episodeSelectors := "#seasons .episodios li a, .episodios li a, ul.episodios a, .se-a a, #episodes a, .episodelist a"
+	episodeSelectors := ".episode-card, h3.episode-title a #seasons .episodios li a, .episodios li a, ul.episodios a, .se-a a, #episodes a, .episodelist a,data-episode-number, data-episode-title"
 	doc.Find(episodeSelectors).Each(func(i int, s *goquery.Selection) {
-		epURL, exists := s.Attr("href")
+		link := s.Find("h3.episode-title a")
+		epURL, exists := link.Attr("href")
 		if !exists || !strings.Contains(epURL, "episodio") {
 			return
 		}
 
-		epTitle := strings.TrimSpace(s.Text())
+		epTitle := s.AttrOr("data-episode-title", strings.TrimSpace(link.Text()))
 
 		// Extract episode number
-		epNumber := "0"
+		epNumber := s.AttrOr("data-episode-number", "0")
 		epMatch := animeDriveEpRe.FindStringSubmatch(epURL)
 		if len(epMatch) > 1 {
 			epNumber = epMatch[1]
@@ -860,7 +861,6 @@ func (c *AnimeDriveClient) GetAnimeDetails(animeURL string) (*AnimeDriveDetails,
 
 // GetAnimeEpisodes converts AnimeDrive episodes to models.Episode format
 func (c *AnimeDriveClient) GetAnimeEpisodes(animeURL string) ([]models.Episode, error) {
-	util.Debug("AnimeDrive episodes", "url", animeURL)
 
 	details, err := c.GetAnimeDetails(animeURL)
 	if err != nil {
@@ -870,6 +870,11 @@ func (c *AnimeDriveClient) GetAnimeEpisodes(animeURL string) ([]models.Episode, 
 	var episodes []models.Episode
 	for _, ep := range details.Episodes {
 		num, _ := strconv.Atoi(ep.Number)
+		util.Debug("AnimeDrive episode candidate",
+			"number", ep.Number,
+			"url", ep.URL,
+		)
+
 		episodes = append(episodes, models.Episode{
 			Number: ep.Number,
 			Num:    num,
@@ -880,7 +885,9 @@ func (c *AnimeDriveClient) GetAnimeEpisodes(animeURL string) ([]models.Episode, 
 		})
 	}
 
-	return episodes, errors.New("failed to retrieve episodes from AnimeDrive")
+	util.Debug("AnimeDrive found episodes", "count", len(episodes))
+
+	return episodes, nil
 }
 
 // GetVideoOptions extracts all quality/server options from an episode
