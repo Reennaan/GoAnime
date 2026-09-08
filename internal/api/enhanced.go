@@ -248,6 +248,8 @@ func searchAnimeEnhanced(
 		registryKinds = []apisource.SourceKind{apisource.SuperFlix}
 	case "anidb":
 		registryKinds = []apisource.SourceKind{apisource.AniDB}
+	case "animedrive":
+		registryKinds = []apisource.SourceKind{apisource.AnimeDrive}
 	case "ptbr", "pt-br":
 		registryKinds = []apisource.SourceKind{apisource.AnimeFire, apisource.Goyabu, apisource.SuperFlix}
 	}
@@ -291,6 +293,8 @@ func searchAnimeEnhanced(
 				anime.Source = "SuperFlix"
 			case "anidb":
 				anime.Source = "AniDB"
+			case "animedrive":
+				anime.Source = "AnimeDrive"
 			}
 			if anime.Source == "" {
 				lowerURL := strings.ToLower(anime.URL)
@@ -303,6 +307,8 @@ func searchAnimeEnhanced(
 					anime.Source = "SuperFlix"
 				case strings.Contains(lowerURL, "anidb.app"):
 					anime.Source = "AniDB"
+				case strings.Contains(lowerURL, "animedrive"):
+					anime.Source = "animedrive"
 				}
 			}
 		}
@@ -933,10 +939,11 @@ func GetSuperFlixStreamURL(media *models.Anime, episode *models.Episode, quality
 // diagnostic line. Counted via countSourceBreakdown so the predicate stays
 // testable in isolation.
 type sourceBreakdown struct {
-	AnimeFire int
-	SuperFlix int
-	Goyabu    int
-	AniDB     int
+	AnimeFire  int
+	SuperFlix  int
+	Goyabu     int
+	AniDB      int
+	AnimeDrive int
 }
 
 // countSourceBreakdown tallies anime results by Source field using
@@ -958,6 +965,8 @@ func countSourceBreakdown(animes []*models.Anime) sourceBreakdown {
 			b.Goyabu++
 		case anime.Source == "AniDB":
 			b.AniDB++
+		case anime.Source == "AnimeDrive":
+			b.AnimeDrive++
 		}
 	}
 	return b
