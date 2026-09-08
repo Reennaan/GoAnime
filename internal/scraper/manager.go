@@ -217,7 +217,6 @@ func (a *AnimeDriveAdapter) GetAnimeEpisodes(animeURL string) ([]models.Episode,
 
 func (a *AnimeDriveAdapter) GetStreamURL(episodeURL string, options ...any) (streamURL string, metadata map[string]string, err error) {
 	url, meta, err := a.client.GetStreamURL(episodeURL)
-	metadata = make(map[string]string)
 	metadata = meta
 	metadata["AnimeDrive"] = "animedrive"
 
