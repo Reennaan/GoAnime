@@ -840,15 +840,26 @@ func (c *AnimeDriveClient) GetAnimeDetails(animeURL string) (*AnimeDriveDetails,
 
 	// Extract episodes
 	var episodes []AnimeDriveEpisode
-	episodeSelectors := ".episode-card, h3.episode-title a #seasons .episodios li a, .episodios li a, ul.episodios a, .se-a a, #episodes a, .episodelist a,data-episode-number, data-episode-title"
+	seenEpisodeURLs := make(map[string]struct{})
+	episodeSelectors := ".episode-card, h3.episode-title a, h3.episode-title a #seasons .episodios li a, .episodios li a, ul.episodios a, .se-a a, #episodes a, .episodelist a,data-episode-number, data-episode-title"
 	doc.Find(episodeSelectors).Each(func(i int, s *goquery.Selection) {
-		link := s.Find("h3.episode-title a")
+		link := s
+		if !s.Is("a") {
+			link = s.Find("h3.episode-title a").First()
+		}
 		epURL, exists := link.Attr("href")
 		if !exists || !strings.Contains(epURL, "episodio") {
 			return
 		}
+		if _, seen := seenEpisodeURLs[epURL]; seen {
+			return
+		}
+		seenEpisodeURLs[epURL] = struct{}{}
 
-		epTitle := s.AttrOr("data-episode-title", strings.TrimSpace(link.Text()))
+		epTitle := strings.TrimSpace(link.Text())
+		if epTitle == "" {
+			epTitle = s.AttrOr("data-episode-title", "")
+		}
 
 		// Extract episode number
 		epNumber := s.AttrOr("data-episode-number", "0")
