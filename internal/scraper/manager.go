@@ -217,10 +217,10 @@ func (a *AnimeDriveAdapter) GetAnimeEpisodes(animeURL string) ([]models.Episode,
 
 func (a *AnimeDriveAdapter) GetStreamURL(episodeURL string, options ...any) (streamURL string, metadata map[string]string, err error) {
 	url, meta, err := a.client.GetStreamURL(episodeURL)
-	metadata = meta
-	metadata["AnimeDrive"] = "animedrive"
-
-	return url, metadata, err
+	if err != nil {
+		return "", nil, err
+	}
+	return url, meta, nil
 }
 
 func (a *AnimeDriveAdapter) GetType() ScraperType {

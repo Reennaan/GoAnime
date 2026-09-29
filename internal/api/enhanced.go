@@ -307,8 +307,8 @@ func searchAnimeEnhanced(
 					anime.Source = "SuperFlix"
 				case strings.Contains(lowerURL, "anidb.app"):
 					anime.Source = "AniDB"
-				case strings.Contains(lowerURL, "animedrive"):
-					anime.Source = "animedrive"
+				case strings.Contains(lowerURL, "animesdrive"):
+					anime.Source = "AnimeDrive"
 				}
 			}
 		}

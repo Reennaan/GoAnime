@@ -55,6 +55,11 @@ func appendPlaybackRefererArgs(mpvArgs []string, videoURL string, isHLSStream, n
 	if referer == "" && isHLSStream {
 		referer = defaultHLSReferer
 	}
+
+	if strings.Contains(lowerURL, "aniplay.online") {
+		referer = "https://animesdrive.cloud/"
+	}
+
 	if referer == "" {
 		return mpvArgs, ""
 	}
